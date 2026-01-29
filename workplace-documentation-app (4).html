@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Voice-powered workplace documentation tracker">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Work Tracker">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23667eea' width='100' height='100'/><text y='75' font-size='70' fill='white' text-anchor='middle' x='50'>📝</text></svg>">
+    <title>Workplace Documentation Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .api-key-section {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .save-api-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .save-api-btn:hover {
+            background: #5568d3;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .record-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .record-btn {
+            width: 100%;
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .record-btn:hover {
+            background: #38a169;
+        }
+
+        .record-btn.recording {
+            background: #f56565;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .transcript-box {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            resize: vertical;
+        }
+
+        .process-btn {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .process-btn:hover {
+            background: #5568d3;
+        }
+
+        .process-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .form-section {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2d3748;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+
+        .save-entry-btn {
+            width: 100%;
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .save-entry-btn:hover {
+            background: #38a169;
+        }
+
+        .entries-list {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .filters {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .export-btn {
+            background: #ed8936;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .export-btn:hover {
+            background: #dd6b20;
+        }
+
+        .entry-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .entry-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #2d3748;
+        }
+
+        .entry-date {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .entry-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-role {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .badge-category {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .badge-tag {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-action {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .entry-summary {
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #4a5568;
+        }
+
+        .entry-transcript {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #718096;
+            border: 1px solid #e2e8f0;
+        }
+
+        .delete-btn {
+            background: #fc8181;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #f56565;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .status-info {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+
+        .no-entries {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+
+            .entry-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Workplace Documentation Tracker</h1>
+            <p>Voice-powered documentation for performance issues, conflicts, and conversations</p>
+            
+            <div class="api-key-section" id="apiKeySection">
+                <label for="apiKeyInput">Claude API Key (required for AI processing):</label>
+                <input type="password" id="apiKeyInput" class="api-key-input" placeholder="sk-ant-...">
+                <button class="save-api-btn" onclick="saveApiKey()">Save API Key</button>
+                <p style="margin-top: 10px; font-size: 12px; color: #718096;">
+                    Get your API key from <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('record')">➕ New Entry</button>
+            <button class="tab" onclick="switchTab('view')">📋 View Entries</button>
+        </div>
+
+        <div id="recordTab" class="tab-content active">
+            <div class="record-section">
+                <h2 style="margin-bottom: 20px;">Record New Entry</h2>
+                
+                <div id="statusMessage"></div>
+
+                <button class="record-btn" id="recordBtn" onclick="toggleRecording()">
+                    🎤 Start Recording
+                </button>
+
+                <textarea class="transcript-box" id="transcriptBox" placeholder="Your transcript will appear here... Or you can type directly."></textarea>
+
+                <button class="process-btn" id="processBtn" onclick="showClarificationPrompt()" disabled>
+                    ✨ Process with AI
+                </button>
+
+                <div class="form-section" id="clarificationSection" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Quick Clarification</h3>
+                    <p style="margin-bottom: 15px; color: #4a5568;">To help organize this entry, please answer:</p>
+                    
+                    <div class="form-group">
+                        <label>Who is this entry mainly about?</label>
+                        <input type="text" id="clarifyPerson" placeholder="Enter person's name">
+                    </div>
+
+                    <div class="form-group">
+                        <label>What is their relationship to you?</label>
+                        <select id="clarifyRole">
+                            <option value="">Select relationship...</option>
+                            <option value="supervisor">Supervisor</option>
+                            <option value="direct report">Direct Report</option>
+                            <option value="division staff">Division Staff</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <button class="process-btn" onclick="processTranscript()">
+                        Continue Processing
+                    </button>
+                </div>
+
+                <div class="form-section" id="formSection" style="display: none;">
+                    <h3 style="margin-bottom: 15px;">Entry Details</h3>
+                    
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="entryDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Person Involved</label>
+                        <input type="text" id="personInvolved" placeholder="Name of person">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="roleSelect">
+                            <option value="">Select role...</option>
+                            <option value="supervisor">Supervisor</option>
+                            <option value="direct report">Direct Report</option>
+                            <option value="division staff">Division Staff</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="categorySelect">
+                            <option value="">Select category...</option>
+                            <option value="discipline">Discipline</option>
+                            <option value="conflict">Conflict</option>
+                            <option value="coaching">Coaching</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="supervisor concern">Supervisor Concern</option>
+                            <option value="documentation">Documentation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tags</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tagLateWork" value="late work">
+                                <label for="tagLateWork">Late Work</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tagAttendance" value="attendance">
+                                <label for="tagAttendance">Attendance</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tagBehavior" value="behavior">
+                                <label for="tagBehavior">Behavior</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tagCommunication" value="communication">
+                                <label for="tagCommunication">Communication</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tagPolicy" value="policy">
+                                <label for="tagPolicy">Policy</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>AI Summary</label>
+                        <textarea id="aiSummary" placeholder="AI-generated summary will appear here"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Action Needed?</label>
+                        <select id="actionNeeded">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="followUpDateGroup" style="display: none;">
+                        <label>Follow-up Date (Optional)</label>
+                        <input type="date" id="followUpDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Raw Transcript</label>
+                        <textarea id="rawTranscript" readonly style="background: #edf2f7;"></textarea>
+                    </div>
+
+                    <button class="save-entry-btn" onclick="saveEntry()">💾 Save Entry</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewTab" class="tab-content">
+            <div class="entries-list">
+                <h2 style="margin-bottom: 20px;">All Entries</h2>
+
+                <div class="filters">
+                    <div class="filter-row">
+                        <input type="text" class="search-input" id="searchPerson" placeholder="Search by person..." onkeyup="filterEntries()">
+                        <select class="search-input" id="filterRole" onchange="filterEntries()">
+                            <option value="">All Roles</option>
+                            <option value="supervisor">Supervisor</option>
+                            <option value="direct report">Direct Report</option>
+                            <option value="division staff">Division Staff</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <select class="search-input" id="filterCategory" onchange="filterEntries()">
+                            <option value="">All Categories</option>
+                            <option value="discipline">Discipline</option>
+                            <option value="conflict">Conflict</option>
+                            <option value="coaching">Coaching</option>
+                            <option value="follow-up">Follow-up</option>
+                            <option value="supervisor concern">Supervisor Concern</option>
+                            <option value="documentation">Documentation</option>
+                        </select>
+                    </div>
+                    <div class="filter-row">
+                        <input type="date" class="search-input" id="filterDateStart" onchange="filterEntries()" placeholder="Start date">
+                        <input type="date" class="search-input" id="filterDateEnd" onchange="filterEntries()" placeholder="End date">
+                        <input type="text" class="search-input" id="searchKeyword" placeholder="Search keywords..." onkeyup="filterEntries()">
+                    </div>
+                    <button class="export-btn" onclick="exportToCSV()">📥 Export to CSV</button>
+                </div>
+
+                <div id="entriesContainer">
+                    <div class="no-entries">No entries yet. Create your first entry using the "New Entry" tab.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let recognition;
+        let isRecording = false;
+        let apiKey = localStorage.getItem('claudeApiKey') || '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (apiKey) {
+                document.getElementById('apiKeyInput').value = apiKey;
+                document.getElementById('apiKeySection').style.background = '#c6f6d5';
+                showStatus('API key loaded', 'success');
+            }
+            
+            // Set today's date
+            document.getElementById('entryDate').valueAsDate = new Date();
+            
+            // Load and display entries
+            loadEntries();
+
+            // Toggle follow-up date field
+            document.getElementById('actionNeeded').addEventListener('change', function() {
+                document.getElementById('followUpDateGroup').style.display = 
+                    this.value === 'yes' ? 'block' : 'none';
+            });
+
+            // Enable process button when transcript has content
+            document.getElementById('transcriptBox').addEventListener('input', function() {
+                document.getElementById('processBtn').disabled = this.value.trim().length === 0;
+            });
+        });
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('claudeApiKey', key);
+                apiKey = key;
+                document.getElementById('apiKeySection').style.background = '#c6f6d5';
+                showStatus('API key saved successfully!', 'success');
+            } else {
+                showStatus('Please enter a valid API key', 'error');
+            }
+        }
+
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showStatus('Speech recognition is not supported in this browser. Please use Chrome or Edge on desktop, or Safari on iOS.', 'error');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            let finalTranscript = document.getElementById('transcriptBox').value;
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                document.getElementById('transcriptBox').value = finalTranscript + interimTranscript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                showStatus('Recording error: ' + event.error, 'error');
+                stopRecording();
+            };
+
+            recognition.onend = function() {
+                if (isRecording) {
+                    recognition.start();
+                }
+            };
+
+            recognition.start();
+            isRecording = true;
+            
+            const btn = document.getElementById('recordBtn');
+            btn.textContent = '⏹️ Stop Recording';
+            btn.classList.add('recording');
+            showStatus('Recording... Speak now!', 'info');
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isRecording = false;
+            
+            const btn = document.getElementById('recordBtn');
+            btn.textContent = '🎤 Start Recording';
+            btn.classList.remove('recording');
+            
+            const transcript = document.getElementById('transcriptBox').value.trim();
+            if (transcript) {
+                showStatus('Recording stopped. Click "Process with AI" to continue.', 'success');
+                document.getElementById('processBtn').disabled = false;
+            } else {
+                showStatus('No speech detected. Try again.', 'error');
+            }
+        }
+
+        function showClarificationPrompt() {
+            const transcript = document.getElementById('transcriptBox').value.trim();
+            if (!transcript) {
+                showStatus('No transcript to process', 'error');
+                return;
+            }
+
+            // Hide the process button and show clarification section
+            document.getElementById('processBtn').style.display = 'none';
+            document.getElementById('clarificationSection').style.display = 'block';
+            
+            // Scroll to clarification
+            document.getElementById('clarificationSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function processTranscript() {
+            // Get clarification data
+            const clarifyPerson = document.getElementById('clarifyPerson').value.trim();
+            const clarifyRole = document.getElementById('clarifyRole').value;
+
+            if (!clarifyPerson || !clarifyRole) {
+                showStatus('Please enter the person\'s name and select their relationship to you', 'error');
+                return;
+            }
+
+            if (!apiKey) {
+                showStatus('Please enter your Claude API key first!', 'error');
+                return;
+            }
+
+            const transcript = document.getElementById('transcriptBox').value.trim();
+            if (!transcript) {
+                showStatus('No transcript to process', 'error');
+                return;
+            }
+
+            // Hide clarification section
+            document.getElementById('clarificationSection').style.display = 'none';
+            showStatus('Processing with AI... Please wait.', 'info');
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 2000,
+                        messages: [{
+                            role: 'user',
+                            content: `You are helping someone document a workplace interaction. Based on this verbal transcript, extract and structure the information.
+
+Today's date is: ${new Date().toISOString().split('T')[0]}
+
+The user has indicated:
+- This entry is mainly about: ${clarifyPerson}
+- Their relationship: ${clarifyRole}
+
+Transcript: "${transcript}"
+
+Please respond ONLY with a valid JSON object (no markdown, no code blocks) with these exact fields:
+{
+  "person": "${clarifyPerson}",
+  "role": "${clarifyRole}",
+  "category": "discipline" or "conflict" or "coaching" or "follow-up" or "supervisor concern" or "documentation",
+  "tags": ["array of relevant tags from: late work, attendance, behavior, communication, policy"],
+  "summary": "a clear, professional 2-3 sentence summary of what happened",
+  "action_needed": "yes" or "no",
+  "date": "YYYY-MM-DD format - extract the date this incident occurred from the transcript. If they say 'today', use today's date. If they say 'yesterday', calculate yesterday. If they mention a specific date, use that. If no date is mentioned, use today's date."
+}
+
+Be concise and professional. Extract only factual information. Pay careful attention to date references like "yesterday", "last week", "on Monday", "January 15th", etc.`
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const content = data.content[0].text;
+                
+                // Parse the JSON response
+                let parsed;
+                try {
+                    // Try to extract JSON from the response
+                    const jsonMatch = content.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        parsed = JSON.parse(jsonMatch[0]);
+                    } else {
+                        parsed = JSON.parse(content);
+                    }
+                } catch (e) {
+                    console.error('Failed to parse AI response:', content);
+                    throw new Error('AI response was not valid JSON');
+                }
+
+                // Populate the form
+                document.getElementById('personInvolved').value = parsed.person || '';
+                document.getElementById('roleSelect').value = parsed.role || '';
+                document.getElementById('categorySelect').value = parsed.category || '';
+                document.getElementById('aiSummary').value = parsed.summary || '';
+                document.getElementById('actionNeeded').value = parsed.action_needed || 'no';
+                document.getElementById('rawTranscript').value = transcript;
+                
+                // Set the date if AI extracted one, otherwise keep today's date
+                if (parsed.date) {
+                    document.getElementById('entryDate').value = parsed.date;
+                }
+
+                // Set tags
+                document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
+                    cb.checked = parsed.tags && parsed.tags.includes(cb.value);
+                });
+
+                // Show follow-up date if action needed
+                if (parsed.action_needed === 'yes') {
+                    document.getElementById('followUpDateGroup').style.display = 'block';
+                }
+
+                // Show the form
+                document.getElementById('formSection').style.display = 'block';
+                showStatus('AI processing complete! Review and save your entry.', 'success');
+                
+                // Scroll to form
+                document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('Error processing transcript:', error);
+                showStatus('Error: ' + error.message + '. Please check your API key and try again.', 'error');
+            }
+        }
+
+        function saveEntry() {
+            const entry = {
+                id: Date.now(),
+                date: document.getElementById('entryDate').value,
+                person: document.getElementById('personInvolved').value,
+                role: document.getElementById('roleSelect').value,
+                category: document.getElementById('categorySelect').value,
+                tags: Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked'))
+                    .map(cb => cb.value),
+                summary: document.getElementById('aiSummary').value,
+                transcript: document.getElementById('rawTranscript').value,
+                actionNeeded: document.getElementById('actionNeeded').value,
+                followUpDate: document.getElementById('followUpDate').value
+            };
+
+            // Validate required fields
+            if (!entry.person || !entry.role || !entry.category || !entry.summary) {
+                showStatus('Please fill in all required fields (Person, Role, Category, Summary)', 'error');
+                return;
+            }
+
+            // Get existing entries
+            let entries = JSON.parse(localStorage.getItem('workplaceEntries') || '[]');
+            entries.unshift(entry); // Add to beginning
+            localStorage.setItem('workplaceEntries', JSON.stringify(entries));
+
+            // If category is follow-up, send email
+            if (entry.category === 'follow-up') {
+                sendFollowUpEmail(entry);
+            }
+
+            showStatus('Entry saved successfully!', 'success');
+            
+            // Reset form
+            setTimeout(() => {
+                resetForm();
+                switchTab('view');
+                loadEntries();
+            }, 1000);
+        }
+
+        function sendFollowUpEmail(entry) {
+            const subject = encodeURIComponent(`Follow-up Required: ${entry.person} - ${new Date(entry.date).toLocaleDateString()}`);
+            
+            const body = encodeURIComponent(`FOLLOW-UP REQUIRED
+
+Date: ${new Date(entry.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+Person: ${entry.person}
+Role: ${entry.role}
+Tags: ${entry.tags.join(', ')}
+${entry.followUpDate ? `Follow-up Date: ${new Date(entry.followUpDate).toLocaleDateString()}` : ''}
+
+SUMMARY:
+${entry.summary}
+
+FULL DETAILS:
+${entry.transcript}
+
+---
+This entry was created using the Workplace Documentation Tracker.`);
+
+            const mailtoLink = `mailto:mfoote@avondaleaz.gov?subject=${subject}&body=${body}`;
+            
+            // Open email client
+            window.location.href = mailtoLink;
+            
+            showStatus('Email draft opened! Please review and send.', 'info');
+        }
+
+        function resetForm() {
+            document.getElementById('transcriptBox').value = '';
+            document.getElementById('personInvolved').value = '';
+            document.getElementById('roleSelect').value = '';
+            document.getElementById('categorySelect').value = '';
+            document.getElementById('aiSummary').value = '';
+            document.getElementById('rawTranscript').value = '';
+            document.getElementById('actionNeeded').value = 'no';
+            document.getElementById('followUpDate').value = '';
+            document.getElementById('entryDate').valueAsDate = new Date();
+            document.getElementById('clarifyPerson').value = '';
+            document.getElementById('clarifyRole').value = '';
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('clarificationSection').style.display = 'none';
+            document.getElementById('followUpDateGroup').style.display = 'none';
+            document.getElementById('processBtn').style.display = 'block';
+            document.getElementById('processBtn').disabled = true;
+        }
+
+        function loadEntries() {
+            const entries = JSON.parse(localStorage.getItem('workplaceEntries') || '[]');
+            displayEntries(entries);
+        }
+
+        function displayEntries(entries) {
+            const container = document.getElementById('entriesContainer');
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<div class="no-entries">No entries match your filters.</div>';
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <div class="entry-card">
+                    <div class="entry-header">
+                        <div>
+                            <div class="entry-title">${entry.person}</div>
+                            <div class="entry-date">${new Date(entry.date).toLocaleDateString('en-US', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteEntry(${entry.id})">Delete</button>
+                    </div>
+                    
+                    <div class="entry-meta">
+                        <span class="badge badge-role">${entry.role}</span>
+                        <span class="badge badge-category">${entry.category}</span>
+                        ${entry.tags.map(tag => `<span class="badge badge-tag">${tag}</span>`).join('')}
+                        ${entry.actionNeeded === 'yes' ? '<span class="badge badge-action">Action Needed</span>' : ''}
+                    </div>
+
+                    <div class="entry-summary">
+                        <strong>Summary:</strong> ${entry.summary}
+                    </div>
+
+                    ${entry.followUpDate ? `<div style="margin: 10px 0; color: #e53e3e; font-weight: 600;">📅 Follow-up: ${new Date(entry.followUpDate).toLocaleDateString()}</div>` : ''}
+
+                    <details>
+                        <summary style="cursor: pointer; color: #667eea; font-weight: 600; margin-top: 10px;">View Full Transcript</summary>
+                        <div class="entry-transcript">${entry.transcript}</div>
+                    </details>
+                </div>
+            `).join('');
+        }
+
+        function filterEntries() {
+            const entries = JSON.parse(localStorage.getItem('workplaceEntries') || '[]');
+            
+            const searchPerson = document.getElementById('searchPerson').value.toLowerCase();
+            const filterRole = document.getElementById('filterRole').value;
+            const filterCategory = document.getElementById('filterCategory').value;
+            const filterDateStart = document.getElementById('filterDateStart').value;
+            const filterDateEnd = document.getElementById('filterDateEnd').value;
+            const searchKeyword = document.getElementById('searchKeyword').value.toLowerCase();
+
+            const filtered = entries.filter(entry => {
+                const matchPerson = !searchPerson || entry.person.toLowerCase().includes(searchPerson);
+                const matchRole = !filterRole || entry.role === filterRole;
+                const matchCategory = !filterCategory || entry.category === filterCategory;
+                const matchDateStart = !filterDateStart || entry.date >= filterDateStart;
+                const matchDateEnd = !filterDateEnd || entry.date <= filterDateEnd;
+                const matchKeyword = !searchKeyword || 
+                    entry.summary.toLowerCase().includes(searchKeyword) ||
+                    entry.transcript.toLowerCase().includes(searchKeyword) ||
+                    entry.tags.some(tag => tag.toLowerCase().includes(searchKeyword));
+
+                return matchPerson && matchRole && matchCategory && matchDateStart && matchDateEnd && matchKeyword;
+            });
+
+            displayEntries(filtered);
+        }
+
+        function deleteEntry(id) {
+            if (!confirm('Are you sure you want to delete this entry?')) {
+                return;
+            }
+
+            let entries = JSON.parse(localStorage.getItem('workplaceEntries') || '[]');
+            entries = entries.filter(entry => entry.id !== id);
+            localStorage.setItem('workplaceEntries', JSON.stringify(entries));
+            
+            loadEntries();
+            showStatus('Entry deleted', 'success');
+        }
+
+        function exportToCSV() {
+            const entries = JSON.parse(localStorage.getItem('workplaceEntries') || '[]');
+            
+            if (entries.length === 0) {
+                showStatus('No entries to export', 'error');
+                return;
+            }
+
+            const headers = ['Date', 'Person', 'Role', 'Category', 'Tags', 'Summary', 'Action Needed', 'Follow-up Date', 'Transcript'];
+            const rows = entries.map(entry => [
+                entry.date,
+                entry.person,
+                entry.role,
+                entry.category,
+                entry.tags.join('; '),
+                entry.summary,
+                entry.actionNeeded,
+                entry.followUpDate || '',
+                entry.transcript.replace(/"/g, '""') // Escape quotes
+            ]);
+
+            const csv = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `workplace-documentation-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            showStatus('Exported to CSV successfully!', 'success');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+            if (tab === 'record') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('recordTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('viewTab').classList.add('active');
+                loadEntries();
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed:', err);
+                    });
+            });
+        }
+
+        // Install prompt for PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button if not already installed
+            if (!window.matchMedia('(display-mode: standalone)').matches) {
+                showInstallPrompt();
+            }
+        });
+
+        function showInstallPrompt() {
+            const installDiv = document.createElement('div');
+            installDiv.className = 'status-message status-info';
+            installDiv.style.position = 'fixed';
+            installDiv.style.top = '20px';
+            installDiv.style.left = '20px';
+            installDiv.style.right = '20px';
+            installDiv.style.zIndex = '9999';
+            installDiv.innerHTML = `
+                📱 Install this app on your phone for quick access!
+                <button onclick="installApp()" style="margin-left: 10px; padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">Install</button>
+                <button onclick="this.parentElement.remove()" style="margin-left: 5px; padding: 8px 15px; background: #cbd5e0; color: #2d3748; border: none; border-radius: 6px; cursor: pointer;">Later</button>
+            `;
+            document.body.appendChild(installDiv);
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('App installed');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
